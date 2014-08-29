@@ -1,9 +1,9 @@
+#!/bin/bash
 #
 # this script dangles the target ECU by the legs 
 # and shakes until all lunch money is on the floor
 #
 
-#!/bin/bash
 ( echo ATZ; sleep 1;
 echo ATE0; sleep 1;
 echo ATL1; sleep 1;
