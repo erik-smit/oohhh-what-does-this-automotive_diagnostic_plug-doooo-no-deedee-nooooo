@@ -1,7 +1,7 @@
 #!/bin/bash
-OUTFILE=${0/.sh/}.log.`date +%s`
-echo Logging to: $OUTFILE
-echo 
+
+. come-on-functions
+
 (
 for init in ATZ ATE0 ATL0 ATH1 ATSP4 STIBR4800 STIMCS1 ATKW0 ATSW00 ATSH010000;
 do
