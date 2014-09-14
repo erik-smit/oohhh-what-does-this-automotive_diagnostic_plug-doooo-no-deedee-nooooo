@@ -1,0 +1,291 @@
+OBDLink ChangeLog
+ScanTool.net LLC
+
+
+v3.3.0 - 2012/09/26
+-------------------
+
+- NEW: STIX (print extended FW version info)
+- NEW: STDICPO (report POR count)
+- NEW: STDITPO (report time since POR)
+- NEW: STDICES (report engine start count)
+- NEW: STDBGM (set debug message level)
+- NEW: Implemented engine crank/start detection
+- NEW: Added engine crank counter output to STDIX command
+- NEW: Implemented cumulative run time timer (returned via STDIX)
+- NEW: Added UART RX OVERFLOW error to report UART Rx buffer overflow
+- NEW: Added reset and sleep/wakeup trigger messages in debug message level 1 or above
+- CHG: Improved voltage measurement precision to 3 decimal places for better accuracy at lower ANALOG_IN voltages
+- CHG: Added optional voltage offset parameter to STVCAL command
+- CHG: STVCAL command now accepts voltage down to 3 decimal point (1 millivolt) precision
+- CHG: Added optional precision parameter to STVR command
+- CHG: Maximum value for all voltage measurement-related commands is now 65.534V
+- CHG: STVR command will now print --.-- when the calibrated voltage exceeds 65.534V
+- CHG: Improved voltage calibration (STVCAL/ATCV commands) accuracy by sampling and averaging readings over about 500 ms
+- CHG: Renamed STCAFCP/STCCFCP commands to STCFCPA/STCFCPC (old ones still available, but deprecated)
+- CHG: STCSWM command now takes mode values from 0 to 8, which independently encode the high speed tool load output
+- CHG: Zero length frames that generated "<DATA ERROR" will now generate "DATA ERROR" instead
+- CHG: Improved CR+LF handling (ignore only the first LF after CR)
+- CHG: Any fatal errors will now be printed again after a reset, to make sure they are not missed
+- CHG: Improved accuracy of all timeouts from -1/+0 ms to -0/+0.5 ms precision
+- CHG: Removed the possibility of device lockup, while handling a fatal error
+- CHG: STSLUIT command will not accept a setting below 5 sec to prevent bricking
+- CHG: Updated STDIX command output to include the new device status info
+- CHG: Command cancellation via UART character is now much more responsive
+- CHG: Device will no longer get stuck receiving OBD messages indefinitely during protocol detection or while handling keep-alives, if connected in parallel with another tester or if message filters are improperly configured
+- CHG: Reduced the extra current drawn by the CAN_TX pin in sleep, when the CAN transceiver is powered off
+- BUG: UART inactivity sleep timer was not being reset if only CRs were being received
+- BUG: UART Rx could lock up or start receiving corrupted data
+- BUG: UART Tx could lock up or transmit corrupted data due to silicon erratum and race conditions
+- BUG: Rarely, under very unusual conditions, UART inactivity sleep or other timeouts could get triggered prematurely
+- BUG: After resetting voltage sense calibration to defaults (ATCV 0000, STVCAL), voltage-based sleep/wakeup triggers would fail to recalibrate until the next device reset
+- BUG: ATCV 0000 and STVCAL commands ignored factory calibration saved via STSAVCAL until the next device reset
+- BUG: STDIX command printed init month off by one
+- BUG: There was a small chance of device lockup after finishing CAN message reception
+- BUG: Waiting for CAN responses was not cancellable via UART character
+- BUG: STSLUIT command was erroneously accepting 0 as a parameter
+- BUG: Some commands that require one parameter would erroneously accept no parameters
+- BUG: Protocol was not being saved after being detected via a monitoring command
+- BUG: ISO 9141 protocol is now properly detected while monitoring (instead of being detected as KWP)
+- BUG: There was a small chance that EEPROM would get corrupted if a device reset interrupted a specific write cycle
+- BUG: CAN frame retransmissions would not stop if message transmission was canceled via a UART character
+
+
+
+v3.1.0 - 2012/05/16
+-------------------
+
+- NEW: STCMM (set CAN monitoring mode)
+- NEW: STFA (enable automatic filtering mode)
+- NEW: STP (set protocol)
+- NEW: STPR (report current protocol number)
+- NEW: STPRS (report current protocol string)
+- NEW: STPO (open protocol)
+- NEW: STPC (close protocol)
+- NEW: STPTO (set OBD response timeout)
+- NEW: STPCB (set automatic check byte calculation/checking)
+- NEW: STVCAL [no param] (reset voltage calibration to factory defaults)
+- NEW: ATCRA [no param] (set CAN hardware filters to defaults)
+- NEW: ATCSM (set CAN silent monitoring)
+- NEW: ATJHF (set J1939 header formatting)
+- NEW: ATJTM (set J1939 response timeout multiplier)
+- NEW: ATBD (compatibility only - NOP)
+- NEW: Renamed filtering commands to fit the new naming convention (old ones still available, but deprecated)
+- NEW: Renamed STPRBR to STPBRR (STPRBR still available, but deprecated)
+- NEW: Implemented PP 11 (J1850 Break Signal monitor enable)
+- NEW: Implemented PP 21 (ATCSM default setting)
+- NEW: Added ability to turn off J1850 CRC calculation and checking
+- NEW: Implemented CAN ERROR detection during monitoring
+- NEW: Added capability to receive invalid CAN frames (STCMM 2 only)
+- NEW: STDIX (factory use only, extended device ID information)
+- CHG: Implemented new default J1939 timeouts
+- CHG: Added CAN transmitter "Bus Off" mode indication to ATCS command
+- CHG: Changed ATST and PP 03 default to 0x19 (102 ms)
+- CHG: Removed length limitation on custom keep alive messages (ATWM command)
+- CHG: Removed 8-byte Tx data length limitation for J1850 protocols (ATAL only)
+- CHG: Increased CAN FIFO size from 23 to 31 frames
+- CHG: Increased UART Tx buffer size from 512 bytes to 1k
+- CHG: STRSTNVM command now also resets the device
+- CHG: ISO 5-baud init will now not complete initialization if the key byte validation fails
+- CHG: Increased ISO feedback settling wait time from 10% to 33% of bit time
+- CHG: Now all filtering commands turn off automatic filtering mode
+- CHG: ATAL is now forced on, when CAN auto formatting is off (ATCAF 0)
+- CHG: UART Rx now ignores LF characters for the purpose of cancelling a command (CR+LF EOL handling)
+- CHG: OBD Rx LED now blinks for all received messages, inluding internally consummed CAN flow control messages and KWP2000 StartComm responses
+- CHG: Now ISO key bytes will be reset to '--' if init fails or is canceled (ELM327 v1.4 behavior)
+- CHG: Relaxed some J1850 PWM timing settings to work better with slightly non-compliant ECUs
+- CHG: STFAPG command now accepts PGNs 4 to 6 characters long
+- BUG: ATTA command was changing headers even if the protocol was already open
+- BUG: KWP fast init was not properly using user-set headers
+- BUG: With protocol A5 set, autodetect would potentially not work properly with non-default headers set
+- BUG: CAN Rx would sometimes lockup the IC during busy CAN bus monitoring due to FIFO corruption
+- BUG: <RX ERROR was being printed on the next good frame (invalid frames could not be received)
+- BUG: There could be erroneous <RX ERRORs after CAN FIFO overflow
+- BUG: SRR bit was being incorrectly set when transmitting 29-bit CAN frames
+- BUG: J1939 TP sessions would not time out if no CAN frames are coming in
+- BUG: Entering monitoring mode would reset CAN settings to the protocol defaults
+- BUG: Due to a race condition, heavy UART Tx traffic sometimes would generate FATAL ERROR 0x0101 [5, ...]
+- BUG: Sleep triggers were not working if ATMA on startup was enabled (PP 00), until ATMA was terminated
+- BUG: Protocol would not get properly saved if ATSP set it to the same protocol that was autodetected or set via ATTP
+- BUG: STIBR command would not correctly set baud rates above 32767 baud
+- BUG: Actual default values for the PowerSave voltage triggers were different from those reported by the STSLCS command
+- BUG: KWP2000 fast init did not work reliably with vehicles that have multiple ECUs responding to StartCommunication message
+- BUG: Some sleep triggers could glitch after about 24 days of continuous operation
+
+
+
+v2.2.2 - 2011/01/11
+-------------------
+
+- NEW: Added voltage level sleep/wakeup PowerSave triggers (STSLVL, STSLVLS, and STSLVLW commands)
+- NEW: Added voltage change wakeup PowerSave trigger (STSLVG and STSLVGW commands)
+- NEW: Added STVR command (read battery voltage with two decimal places precision)
+- NEW: Added STVRX command (return battery voltage in ADC steps)
+- NEW: Added STVCAL command (calibrate voltage measurement)
+- CHG: Updated STSLCS command output for clarity and to include the new PowerSave triggers
+- CHG: RST_NVM input and STRSTNVM command now also reset the voltage calibration to the default value
+- BUG: Setting programmable parameter 17 to 00 would turn off keep-alives
+- BUG: Programmable parameter 17 setting was being ignored
+- BUG: ATRV command output was not ELM327 compliant through the entire range (100.0V could be displayed instead of --.-V)
+- BUG: Some timeout settings could be violated for a short period of time after about 24 days of continuous operation
+
+
+
+v2.1.2 - 2010/08/25
+-------------------
+
+- BUG: Previous release was not compiled with proper silicon errata libs
+
+
+
+v2.1.1 - 2010/08/24
+-------------------
+
+- BUG: ATIB command was not being recognized
+
+
+
+v2.1.0 - 2010/06/24
+-------------------
+
+- CHG: Changed default UART baud rate to 115.2 kbaud
+- CHG: Changed default PP 0C value to 23 (115.2 kbaud)
+
+
+
+v2.0.2 - 2010/06/24
+-------------------
+
+- NEW: Added INTERNAL ERROR and FATAL ERROR reporting
+- CHG: Further reduced current consumption during sleep
+- BUG: ATDP command was appending extra CR character for KWP2000 protocols
+- BUG: Protocol 5A could be erroneously detected on protocol 3A connection failure
+
+
+
+v2.0.1 - 2010/06/08
+-------------------
+
+- NEW: Added support for J1939 and USERx CAN protocols:
+        * Implemented protocols A through C
+        * Implemented programmable parameters 2B through 2F
+        * Added ATMP and ATDM1 commands (monitor for PGNs)
+        * Added ATJE and ATJS commands (set J1939 Tx PGN data format to MSB first/LSB first)
+        * Added ATPB command (set protocol B options and baud rate)
+        * Added STFAPG and STFCPG commands (add/clear PGN filters)
+- NEW: Added PowerSave functionality:
+        * STSLEEP command
+        * UART inactivity sleep and UART pulse wakeup triggers (STSLU, STSLUIT, and STSLUWP commands)
+        * External sleep control input sleep/wakeup triggers (STSLX, STSLXST, and STSLXWT commands)
+        * Configuration and status reporting (STSLCS, STSLLT, and STSLXS commands)
+        * Complete ELM327 v1.4 power control support (ATLP, ATIGN commands, and 0E programmable parameter)
+- NEW: Added ATIB48 command (set ISO baud rate to 4800)
+- NEW: Added ATFI and ATSI commands (perform ISO fast/5-baud bus init)
+- NEW: Added ATCV 0000 command (restore factory VMEASURE calibration)
+- NEW: Added ATTA command (set tester address)
+- NEW: Added ATSD and ATRD commands (store/read user data byte)
+- NEW: Added ATFE and ATSS commands as NOPs (not applicable) for compatibility with ELM327 software
+- NEW: Implemented PP 15 (default ISO P1 max timing)
+- NEW: Implemented PP 19 (delay between ISO fast and 5-baud bus init during automatic protocol detection)
+- NEW: Implemented PP 2A (CAN error checking [b7: ISO 15765 data length and b6: ISO 15765 PCI=00])
+- NEW: Implemented <RX ERROR detection during CAN bus monitoring
+- NEW: Added STSBR command (set UART baud rate in terminal-friendly way)
+- NEW: Added STWBR command (write current UART baud rate to NVM)
+- NEW: Added STCMM command (set CAN monitoring mode)
+- NEW: Added STPBR command (set protocol baud rate for ISO and CAN)
+- NEW: Added STRPBR command (report protocol baud rate for all supported OBD protocols)
+- NEW: Added STFCA command (clear all OBD filters)
+- NEW: Added STSATI command (set ATI ID string)
+- NEW: Added STRSTNVM command (reset user-configurable NVM settings to factory defaults)
+- CHG: PP 06 changes will now take effect upon reset to defaults (ATD)
+- CHG: ATAR command now clears all filters before adding default ones for consistent operation across protocols
+- CHG: Default ISO 9141 filters are now pass-all due to point-to-point nature of the connection
+- CHG: RST_NVM input now sets all user-configurable NVM settings to their defaults, except VMEASURE calibration and ATSD data
+- CHG: Increased CAN Tx timeout to 300 ms to reduce the occurrence of CAN ERRORs due to noise or poor link quality
+- CHG: ISO 5-baud bus init is now considered successful even if the inverted address byte is not received from ECU or is invalid
+- CHG: Adding duplicate filters will now succeed without using any extra memory
+- CHG: OBD Tx LED now blinks for all OBD Tx activity, including IFR and flow control frame transmissions during reception
+- CHG: Cold start startup time has been reduced by 120 ms
+
+
+
+v1.2.4 - 2010/03/09
+-------------------
+
+- BUG: Monitoring commands under certain conditions would erroneously terminate with BUFFER FULL error
+
+
+
+v1.2.2 - 2010/02/15
+-------------------
+
+- NEW: Updated to work with OBDLink U r2.0 and above, OBDLink S, and microOBD hardware
+- NEW: Implemented one-time programming of the STMFR string for OEMs
+- CHG: Improved J1850 PWM transmitter to work better with improperly loaded buses
+- CHG: Improved J1850 PWM receiver's symbol detection
+- BUG: STSAVCAL command could not check whether VMEASURE calibration value was already saved
+
+
+
+v1.2.0 - 2010/01/20
+-------------------
+
+- NEW: Added AT@3 command (store device identifier)
+- NEW: Added STMFR command (print device manufacturer ID string)
+- NEW: Added STDI command (print device hardware ID string)
+- NEW: Added STSN command (print device serial number)
+- NEW: Added STS@1 command (set AT@1 device description string)
+- NEW: Added STSAVCAL command (save factory calibration values)
+- CHG: STI command now prints controller ID, instead of device name
+- CHG: Implemented new AT@1 functionality (now changeable via STS@1)
+- CHG: Restored ELM327 functionality for AT@2 command (now one-time programmable via AT@3)
+- CHG: Changed default programmable parameter 13 setting to 0xF4 (999ms)
+- BUG: Sometimes, 4 dots would be printed during ISO 5-baud init
+- BUG: Due to a compiler bug, under certain conditions, ISO keep-alives were sent back-to-back and tester address set via PP 06, was not used for keep-alive headers
+
+
+
+v1.1.3 - 2009/12/16
+-------------------
+
+- NEW: Added STIP1X command (set ISO P1Max timing)
+- NEW: Added STIP4 command (set ISO P4 timing)
+- NEW: Added STIAT command (turn ISO adaptive interbyte timing on/off)
+- CHG: In KWP2000 protocol with manual checksum mode on, the minimum data length for transmitted messages is now 2 bytes
+- CHG: ISO9141-2 messages are now truncated to 11 bytes or split into 11-byte chunks (maximum length for OBD-II messages) for normal reception (ATNL mode). This improves reliability of communication with 9494 keyword ECUs
+- CHG: When monitoring messages in ATNL mode while a KWP2000 protocol is selected, ISO9141-2 (CARB) messages are now truncated to 12 bytes or split into 12-byte chunks
+- BUG: During monitoring, first byte of ISO messages was sometimes printed incorrectly
+- BUG: J1850 PWM transmitter was reading J1850 VPW Rx input during bus acquisition
+- BUG: For UART baud rates below 611 baud, the divisor was calculated incorrectly
+- BUG: Under some rare circumstances, false feedback errors were detected during ISO 5-baud init
+
+
+
+v1.1.0 - 2009/10/01
+-------------------
+
+- NEW: Added STBR command (set UART baud rate)
+- NEW: Added STBRT command (set UART baud rate switch timeout)
+- NEW: Added ATIB96 command (set ISO baud rate to 9600)
+- NEW: Added STIBR command (set ISO baud rate)
+- NEW: Added STIMCS command (turn ISO manual checksum on/off)
+- NEW: Added STM and STMA commands to enable monitoring using the new filtering subsystem
+- NEW: Implemented programmable parameter 16 (default ATIB setting)
+- NEW: Implemented programmable parameter 0C (default UART baud rate divisor)
+- NEW: Implemented hardware reset functionality to reset programmable parameters to defaults
+- CHG: ISO 5-baud init can now be cancelled on any character received over UART
+- CHG: Updated dot printing during ISO 5-baud init to follow ELM327 v1.3a behavior
+- CHG: ATWS command now keeps current UART baud rate setting, per ELM327 functionality
+- CHG: Increased UART baud rate error limit to +/- 3% (ATBRD and PP 0C divisors 9 and 7 are now supported)
+- CHG: Reduced startup time by reducing bootloader delay and speeding up LED test for improved compatibility with legacy software
+- BUG: Source address header byte in ISO keep-alive messages should be set to OBD source (tester) address (set by PP 06)
+- BUG: ATMx commands now use the current CAN HW filter setting (ATCF and ATCM), instead of resetting it to pass-all
+- BUG: Carriage return character specified via programmable parameter 0D is now used for UART reception, as well as transmission
+- BUG: Baud rate switching (ATBRD and STBR commands) now uses character specified via programmable parameter 0D for confirmation
+
+
+
+v1.0.0 - 2009/08/20
+-------------------
+
+- NEW: Initial release
