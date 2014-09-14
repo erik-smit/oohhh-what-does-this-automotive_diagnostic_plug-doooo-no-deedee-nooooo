@@ -45,24 +45,6 @@ def stampmindebakkes():
   for line in init:
     feed(line)
 
-# FIXME: diagnostic mode stomping is not supported by all ECUs
-#  for mode in range(0, 255):
-#    request = "10 %.2X" % mode
-#    response = feed(request)
-#    if not "50 %.2X" % mode in response: continue
-#    outfile.write(request + " | " + response + "\n")
-#    print(request + " | " + response)
-# FIXME: baudrate stomping?
-# request = "10 %.2X 04" % mode
-#    request = "STIBR57600"
-#    response = feed(request)
-#    outfile.write(request + " | " + response + "\n")
-#    print(request + " | " + response)
-#    request = "STIAT0"
-#    response = feed(request)
-#    outfile.write(request + " | " + response + "\n")
-#    print(request + " | " + response)
-#    if "7F 10 12" in response: continue
   for something in [ 1 ]:
     for service in range(0,31) + range (33,129) + range(131,255):
       request = "%.2X" % service
