@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    
+  </head>
+  
+  <body>
+    <h1>Autostomperino</h1>
+    
+    <!-- Another event emission, this time to turn on bluetooth and start using it -->
+    
+    <btn class="btn btn-primary" onclick="droid.eventPost('bluetooth', '')">Connect</btn>
+    <hr>
+    
+    <!-- Last event to switch off our SL4A program -->
+    <btn class="btn btn-primary" onclick="droid.eventPost('kill', '')">Quit</btn>
+    <hr>
+    <h3>Output</h3>
+    <textarea class="form-control" id="output" rows="20"></textarea>
+
+    <script>
+    
+      var droid = new Android();
+      droid.registerCallback('bluetoothOut', function(e) {
+        textarea = document.getElementById('output');
+        textarea.value = textarea.value + e.data;
+        textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
+      });
+
+    </script>
+  </body>
+</html>
